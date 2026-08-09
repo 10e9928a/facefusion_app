@@ -1,0 +1,6 @@
+{
+  "name": "sms-auth",
+  "extensions": {
+    "uni-cloud-sms": {}
+  }
+}

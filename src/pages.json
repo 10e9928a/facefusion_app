@@ -1,0 +1,79 @@
+{
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^up-(.*)": "uview-plus/components/u-$1/u-$1.vue",
+      "^u-([^-].*)": "uview-plus/components/u-$1/u-$1.vue"
+    }
+  },
+  "pages": [
+    {
+      "path": "pages/home/index",
+      "style": {
+        "navigationBarTitleText": "换脸"
+      }
+    },
+    {
+      "path": "pages/user/index",
+      "style": {
+        "navigationBarTitleText": "用户中心"
+      }
+    },
+    {
+      "path": "pages/user/tasks/history",
+      "style": {
+        "navigationBarTitleText": "任务记录"
+      }
+    },
+    {
+      "path": "pages/user/points/history",
+      "style": {
+        "navigationBarTitleText": "积分记录"
+      }
+    },
+    {
+      "path": "pages/user/points/redeem",
+      "style": {
+        "navigationBarTitleText": "积分兑换"
+      }
+    },
+    {
+      "path": "pages/user/auth/login",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    },
+    {
+      "path": "pages/common/tcontent",
+      "style": {
+        "navigationBarTitleText": "FaceFusion"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "FaceFusion",
+    "navigationBarBackgroundColor": "#f5f6fb",
+    "backgroundColor": "#f5f6fb"
+  },
+  "tabBar": {
+    "borderStyle": "white",
+    "backgroundColor": "#5f616e",
+    "color": "#aaacb9",
+    "selectedColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "iconPath": "static/tabbar/home.png",
+        "selectedIconPath": "static/tabbar/homeactive.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/user/index",
+        "iconPath": "static/tabbar/user.png",
+        "selectedIconPath": "static/tabbar/useractive.png",
+        "text": "用户中心"
+      }
+    ]
+  }
+}

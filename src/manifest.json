@@ -1,0 +1,101 @@
+{
+    "name" : "FaceFusion",
+    "appid" : "__UNI__9C561CD",
+    "description" : "Norma AI-智能AI换脸AI绘画",
+    "versionName" : "1.0.13",
+    "versionCode" : 1013,
+    "transformPx" : false,
+    "app-plus" : {
+        "usingComponents" : true,
+        "nvueStyleCompiler" : "uni-app",
+        "compilerVersion" : 3,
+        "splashscreen" : {
+            "alwaysShowBeforeRender" : true,
+            "waiting" : true,
+            "autoclose" : true,
+            "delay" : 0
+        },
+        "modules" : {
+            "Camera" : {}
+        },
+        "distribute" : {
+            "android" : {
+                "permissions" : [
+                    "<uses-feature android:name=\"android.hardware.camera.autofocus\"/>",
+                    "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>",
+                    "<uses-permission android:name=\"android.permission.CAMERA\"/>",
+                    "<uses-permission android:name=\"android.permission.FLASHLIGHT\"/>",
+                    "<uses-feature android:name=\"android.hardware.camera\"/>"
+                ],
+                "minSdkVersion" : 21
+            },
+            "ios" : {
+                "dSYMs" : false
+            },
+            "sdkConfigs" : {
+            },
+            "icons" : {
+                "android" : {
+                    "hdpi" : "static/app-icons/72x72.png",
+                    "xhdpi" : "static/app-icons/96x96.png",
+                    "xxhdpi" : "static/app-icons/144x144.png",
+                    "xxxhdpi" : "static/app-icons/192x192.png"
+                },
+                "ios" : {
+                    "appstore" : "static/app-icons/1024x1024.png",
+                    "ipad" : {
+                        "app" : "static/app-icons/76x76.png",
+                        "app@2x" : "static/app-icons/152x152.png",
+                        "notification" : "static/app-icons/20x20.png",
+                        "notification@2x" : "static/app-icons/40x40.png",
+                        "proapp@2x" : "static/app-icons/167x167.png",
+                        "settings" : "static/app-icons/29x29.png",
+                        "settings@2x" : "static/app-icons/58x58.png",
+                        "spotlight" : "static/app-icons/40x40.png",
+                        "spotlight@2x" : "static/app-icons/80x80.png"
+                    },
+                    "iphone" : {
+                        "app@2x" : "static/app-icons/120x120.png",
+                        "app@3x" : "static/app-icons/180x180.png",
+                        "notification@2x" : "static/app-icons/40x40.png",
+                        "notification@3x" : "static/app-icons/60x60.png",
+                        "settings@2x" : "static/app-icons/58x58.png",
+                        "settings@3x" : "static/app-icons/87x87.png",
+                        "spotlight@2x" : "static/app-icons/80x80.png",
+                        "spotlight@3x" : "static/app-icons/120x120.png"
+                    }
+                }
+            },
+            "splashscreen" : {
+                "androidStyle" : "common"
+            }
+        },
+        "uniStatistics" : {
+            "enable" : false
+        },
+        "safearea" : {}
+    },
+    "mp-weixin" : {
+        "lazyCodeLoading" : "requiredComponents",
+        "appid" : "wxeea9ee2374b18675",
+        "setting" : {
+            "urlCheck" : false
+        },
+        "usingComponents" : true
+    },
+    "mp-kuaishou" : {
+        "usingComponents" : true,
+        "appid" : "ks699746796204324061"
+    },
+    "uniStatistics" : {
+        "enable" : false,
+        "version" : "2"
+    },
+    "vueVersion" : "3",
+    "locale" : "zh-Hans",
+    "uniCloud" : {
+        "provider" : "alipay",
+        "spaceId" : "env-00jy6futmtdk",
+        "spaceAppId" : "2021006161699532"
+    }
+}
