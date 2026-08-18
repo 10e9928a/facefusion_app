@@ -1,7 +1,7 @@
 import { onShow } from '@dcloudio/uni-app';
 import { reactive } from 'vue';
 import { addSource, deleteSource, fetchSources, type Source } from '@/services/facefusionApi';
-import { uploadMedia } from '@/services/hubApi';
+import { fetchMediaAsset, uploadMedia } from '@/services/hubApi';
 
 const MAX_SOURCE_COUNT = 10;
 
@@ -17,7 +17,15 @@ export const useFaceSource = () => {
 
   const load = async () => {
     try {
-      state.sources = await fetchSources();
+      const sources = await fetchSources();
+      state.sources = await Promise.all(sources.map(async (source) => {
+        try {
+          const asset = await fetchMediaAsset(source.assetId);
+          return { ...source, url: asset.url, thumbUrl: asset.url };
+        } catch {
+          return source;
+        }
+      }));
     } catch (e: any) {
       // 未登录等
     }
@@ -34,7 +42,7 @@ export const useFaceSource = () => {
     state.uploading = true;
     try {
       const up = await uploadMedia(filePath);
-      await addSource({ url: up.url });
+      await addSource({ assetId: up.assetId });
       await load();
       state.selectedIndex = 0;
     } catch (e: any) {

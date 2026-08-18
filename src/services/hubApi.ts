@@ -94,23 +94,24 @@ export function redeem(code: string) {
 
 // ── 上传 ──
 
-function parseUploadUrl(data: string): string {
+function parseUpload(data: string): { assetId: string; url: string } {
   const payload = JSON.parse(data) as {
     ok?: boolean;
-    data?: { url?: string; name?: string };
+    data?: { assetId?: string; url?: string; name?: string };
     url?: string;
     name?: string;
     error?: string | { message?: string };
     message?: string;
   };
   const url = payload?.data?.url || payload?.url || payload?.name || payload?.data?.name;
+  const assetId = payload?.data?.assetId;
   const error = typeof payload?.error === 'string' ? payload.error : payload?.error?.message;
-  if (!url) throw new Error(error || payload?.message || '上传失败');
-  return url;
+  if (!url || !assetId) throw new Error(error || payload?.message || '上传服务未返回资产标识');
+  return { assetId, url };
 }
 
 /** 上传图片 / 视频到统一 upload_hub；用户 JWT 决定资产归属。 */
-export function uploadMedia(filePath: string): Promise<{ url: string }> {
+export function uploadMedia(filePath: string): Promise<{ assetId: string; url: string }> {
   const token = getToken();
   if (!token) return Promise.reject(new Error('请先登录'));
   return new Promise((resolve, reject) => {
@@ -128,12 +129,34 @@ export function uploadMedia(filePath: string): Promise<{ url: string }> {
             reject(new Error(`上传失败(${res.statusCode})`));
             return;
           }
-          resolve({ url: parseUploadUrl(res.data) });
+          resolve(parseUpload(res.data));
         } catch (e: any) {
           reject(new Error(e.message || '上传响应解析失败'));
         }
       },
       fail: (err) => reject(new Error(err.errMsg || '上传失败')),
+    });
+  });
+}
+
+export function fetchMediaAsset(assetId: string): Promise<{ assetId: string; url: string }> {
+  const token = getToken();
+  if (!token) return Promise.reject(new Error('请先登录'));
+  const baseUrl = UPLOAD_CONFIG.url.replace(/\/upload\/?$/, '');
+  return new Promise((resolve, reject) => {
+    uni.request({
+      url: `${baseUrl}/v1/media/assets/${encodeURIComponent(assetId)}`,
+      method: 'GET',
+      header: {
+        Authorization: `Bearer ${token}`,
+        'X-App-Key': HUB_CONFIG.appKey,
+      },
+      success: (res) => {
+        const payload = res.data as HubResponse<{ assetId: string; url: string }>;
+        if (payload?.ok && payload.data?.url) resolve(payload.data);
+        else reject(new Error(payload?.error?.message || `文件不可用(${res.statusCode})`));
+      },
+      fail: (err) => reject(new Error(err.errMsg || '文件服务不可用')),
     });
   });
 }

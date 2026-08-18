@@ -50,10 +50,6 @@ export const FACEFUSION_CONFIG = {
   baseUrl: baseUrl('VITE_FF_API_BASE'),
 };
 
-export const FACEFUSION_ENGINE_CONFIG = {
-  baseUrl: baseUrl('VITE_FF_ENGINE_BASE'),
-};
-
 export const UPLOAD_CONFIG = {
   url: requiredEnv('VITE_UPLOAD_URL'),
 };

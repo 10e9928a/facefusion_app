@@ -5,7 +5,6 @@ interface ImportMetaEnv {
   readonly VITE_HUB_APP_KEY?: string;
   readonly VITE_HUB_CLIENT_SECRET?: string;
   readonly VITE_FF_API_BASE?: string;
-  readonly VITE_FF_ENGINE_BASE?: string;
   readonly VITE_UPLOAD_URL?: string;
 }
 

@@ -7,6 +7,7 @@ import { navigateTo } from '@/utils';
 
 type TargetKind = 'image' | 'video';
 type TargetFile = {
+  assetId?: string;
   status: string;
   url: string;
   localPath?: string;
@@ -97,6 +98,7 @@ export const useSwapFace = () => {
         ...target,
         status: 'success',
         message: '',
+        assetId: up.assetId,
         url: up.url,
       }];
     } catch (e: any) {
@@ -169,11 +171,11 @@ export const useSwapFace = () => {
 
   const validate = (): boolean => {
     const target = state.targetList[0];
-    if (!target || target.status !== 'success' || !target.url.startsWith('http')) {
+    if (!target || target.status !== 'success' || !target.url.startsWith('http') || !target.assetId) {
       uni.showToast({ title: '请上传并等待模板上传完成', icon: 'none' });
       return false;
     }
-    if (!state.source?.url) {
+    if (!state.source?.assetId) {
       uni.showToast({ title: '请选择或上传人脸', icon: 'none' });
       return false;
     }
@@ -202,8 +204,8 @@ export const useSwapFace = () => {
     try {
       await submitFaceSwap({
         type: state.kind!,
-        targetUrl: state.targetList[0].url,
-        sourceUrl: state.source!.url,
+        targetAssetId: state.targetList[0].assetId!,
+        sourceId: state.source!.id,
         options: {
           face_selector_mode: 'reference',
           reference_face_position: state.selectedFace!.position,

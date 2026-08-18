@@ -7,7 +7,6 @@ const valid = {
   VITE_HUB_APP_KEY: 'facefusion',
   VITE_HUB_CLIENT_SECRET: 'public-client-credential',
   VITE_FF_API_BASE: 'https://facefusion.example.com:8443',
-  VITE_FF_ENGINE_BASE: 'https://engine.example.com:8443',
   VITE_UPLOAD_URL: 'https://upload.example.com:8443/upload',
 }
 

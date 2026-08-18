@@ -36,6 +36,7 @@
 import { onHide, onShow, onUnload } from '@dcloudio/uni-app';
 import { reactive } from 'vue';
 import { deleteOutput, fetchOutputs, type Output } from '@/services/facefusionApi';
+import { fetchMediaAsset } from '@/services/hubApi';
 import { copyText, downloadFileAndSaveToAlbum, formatDateTime } from '@/utils';
 import { ensureLogin, isLoggedIn } from '@/stores/auth';
 
@@ -118,20 +119,29 @@ const itemClick = (item: Output) => {
 const selectClick = async (action: any) => {
   const item = state.current;
   if (!item) return;
+  let resultUrl = item.resultUrl;
+  if ((action.name === '复制链接' || action.name === '立即下载') && item.resultAssetId) {
+    try {
+      resultUrl = (await fetchMediaAsset(item.resultAssetId)).url;
+    } catch (e: any) {
+      uni.showToast({ title: e?.message || '结果文件不可用', icon: 'none' });
+      return;
+    }
+  }
   if (action.name === '复制链接') {
-    if (item.status !== 'succeeded' || !item.resultUrl) {
+    if (item.status !== 'succeeded' || !resultUrl) {
       uni.showToast({ title: '结果尚未就绪', icon: 'none' });
       return;
     }
-    copyText(item.resultUrl);
+    copyText(resultUrl);
   }
   if (action.name === '立即下载') {
-    if (item.status !== 'succeeded' || !item.resultUrl) {
+    if (item.status !== 'succeeded' || !resultUrl) {
       uni.showToast({ title: '结果尚未就绪', icon: 'none' });
       return;
     }
     uni.showToast({ title: '下载中0%', icon: 'loading', duration: 1000000 });
-    const result = (await downloadFileAndSaveToAlbum(item.resultUrl)) as any;
+    const result = (await downloadFileAndSaveToAlbum(resultUrl)) as any;
     uni.hideToast();
     uni.showToast(result);
   }

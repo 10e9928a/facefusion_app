@@ -1,7 +1,7 @@
 # FaceFusion 客户端
 
 uni-app 多端换脸应用（微信 / 快手小程序、H5 与 App），对接 User Hub 中台、
-`facefusion_api` 业务后端、FaceFusion 检测引擎与通用 Upload Hub。
+`facefusion_api` 业务后端与通用 Upload Hub；GPU 引擎仅由业务后端在内网访问。
 
 ## 架构
 
@@ -9,7 +9,6 @@ uni-app 多端换脸应用（微信 / 快手小程序、H5 与 App），对接 U
 facefusion_app
   ├─ HMAC + JWT → user_hub_api（登录 / 积分 / 计费）
   ├─ Bearer JWT → facefusion_api（人脸库 / 换脸任务）
-  ├─ 直连 → facefusion 引擎（人脸检测 /reference）
   └─ Bearer JWT → upload_hub（COS 私有媒体上传）
 ```
 
@@ -30,7 +29,6 @@ yarn dev:h5   # 或 yarn dev:mp-weixin
 ```env
 VITE_HUB_BASE=http://127.0.0.1:5001
 VITE_FF_API_BASE=http://127.0.0.1:8400
-VITE_FF_ENGINE_BASE=http://127.0.0.1:8000
 VITE_HUB_APP_KEY=facefusion
 VITE_HUB_CLIENT_SECRET=replace-with-public-client-credential
 VITE_UPLOAD_URL=http://127.0.0.1:5010/upload
@@ -44,7 +42,6 @@ VITE_UPLOAD_URL=http://127.0.0.1:5010/upload
 | `VITE_HUB_APP_KEY` | User Hub 应用标识，必须显式配置 |
 | `VITE_HUB_CLIENT_SECRET` | 打入客户端的公开 HMAC 凭据，不是真正密钥 |
 | `VITE_FF_API_BASE` | facefusion_api 地址 |
-| `VITE_FF_ENGINE_BASE` | facefusion 引擎（人脸检测） |
 | `VITE_UPLOAD_URL` | Upload Hub 的完整 `/upload` 入口 |
 
 `.env.development` 仅用于本地环境，已被 Git 忽略。所有 `VITE_` 变量都会进入客户端包；`VITE_HUB_CLIENT_SECRET`

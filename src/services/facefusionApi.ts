@@ -3,7 +3,7 @@
  * 鉴权: Bearer JWT(来自 user_hub 登录) + X-App-Key, 由后端经 user_hub verify-user 校验。
  */
 
-import { FACEFUSION_CONFIG, FACEFUSION_ENGINE_CONFIG, HUB_CONFIG, STORAGE_KEYS } from '@/config/hub';
+import { FACEFUSION_CONFIG, HUB_CONFIG, STORAGE_KEYS } from '@/config/hub';
 
 type ApiResponse<T> = { ok: boolean; data?: T; error?: { code?: number | string; message?: string } };
 
@@ -67,45 +67,28 @@ export type ReferenceResult = {
   faces: DetectedFace[];
 };
 
-function engineUrl(path: string) {
-  const base = FACEFUSION_ENGINE_CONFIG.baseUrl.replace(/\/$/, '');
-  if (/^https?:\/\//i.test(path)) return path;
-  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
-}
-
-function parseEngineError(data: any, statusCode: number) {
-  const detail = data?.detail;
-  if (typeof detail === 'string') return detail;
-  if (Array.isArray(detail)) {
-    return detail.map((d: any) => d.msg || JSON.stringify(d)).join('; ');
-  }
-  return data?.message || `检测失败(${statusCode})`;
-}
-
-function mapReferenceResult(data: any): ReferenceResult {
-  const faces = (data?.faces || []).map((face: DetectedFace) => ({
-    ...face,
-    image_url: engineUrl(face.image_url),
-  }));
-  return { ...data, faces };
-}
-
-/** 直接上传本地文件到引擎 /reference 检测(推荐, 避免图床 URL 拉取失败)。 */
+/** 通过业务后端上传本地文件做人脸检测，GPU 引擎不暴露给客户端。 */
 export function detectTargetFacesByFile(filePath: string): Promise<ReferenceResult> {
+  const token = getToken();
+  if (!token) return Promise.reject(new Error('请先登录'));
   return new Promise((resolve, reject) => {
     uni.uploadFile({
-      url: engineUrl('/reference'),
+      url: `${FACEFUSION_CONFIG.baseUrl}/api/reference`,
       filePath,
       name: 'target',
-      formData: { padding: '0.4' },
+      header: {
+        Authorization: `Bearer ${token}`,
+        'X-App-Key': HUB_CONFIG.appKey,
+        'X-Platform': HUB_CONFIG.platform,
+      },
       success: (res) => {
         try {
-          const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
-          if (res.statusCode >= 400) {
-            reject(new Error(parseEngineError(data, res.statusCode)));
+          const payload = (typeof res.data === 'string' ? JSON.parse(res.data) : res.data) as ApiResponse<ReferenceResult>;
+          if (res.statusCode >= 400 || !payload?.ok || !payload.data) {
+            reject(new Error(payload?.error?.message || `检测失败(${res.statusCode})`));
             return;
           }
-          resolve(mapReferenceResult(data));
+          resolve(payload.data);
         } catch (e: any) {
           reject(new Error(e.message || '检测响应解析失败'));
         }
@@ -116,34 +99,18 @@ export function detectTargetFacesByFile(filePath: string): Promise<ReferenceResu
 }
 
 export function detectTargetFaces(targetUrl: string): Promise<ReferenceResult> {
-  return new Promise((resolve, reject) => {
-    uni.request({
-      url: engineUrl('/reference/url'),
-      method: 'POST',
-      header: { 'Content-Type': 'application/json' },
-      data: { target_url: targetUrl },
-      success: (res) => {
-        const data = res.data as any;
-        if (res.statusCode >= 400) {
-          reject(new Error(parseEngineError(data, res.statusCode)));
-          return;
-        }
-        resolve(mapReferenceResult(data));
-      },
-      fail: (err) => reject(new Error(err.errMsg || '检测失败')),
-    });
-  });
+  return ffRequest<ReferenceResult>('POST', '/api/reference/url', { targetUrl });
 }
 
 // ── 人脸库 ──
 
-export type Source = { id: number; name: string; url: string; thumbUrl: string; createdAt: string };
+export type Source = { id: number; assetId: string; name: string; url: string; thumbUrl: string; createdAt: string };
 
 export function fetchSources() {
   return ffRequest<Source[]>('GET', '/api/sources');
 }
 
-export function addSource(body: { url: string; thumbUrl?: string; name?: string }) {
+export function addSource(body: { assetId: string; name?: string }) {
   return ffRequest<Source>('POST', '/api/sources', body);
 }
 
@@ -162,14 +129,15 @@ export type Output = {
   sourceUrl: string;
   targetUrl: string;
   resultUrl: string;
+  resultAssetId: string | null;
   error: string;
   createdAt: string;
 };
 
 export function submitFaceSwap(body: {
   type: 'image' | 'video';
-  targetUrl: string;
-  sourceUrl?: string;
+  targetAssetId: string;
+  sourceAssetId?: string;
   sourceId?: number;
   options?: Record<string, any>;
 }) {
