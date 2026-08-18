@@ -106,6 +106,14 @@ export const useSwapFace = () => {
   };
 
   const chooseTarget = async () => {
+    if (!isLoggedIn()) {
+      const ok = await ensureLogin();
+      if (!ok) {
+        uni.showToast({ title: '请先登录', icon: 'none' });
+        setTimeout(() => navigateTo('/pages/user/auth/login'), 800);
+        return;
+      }
+    }
     const chosen: any = await new Promise((resolve) => {
       uni.chooseMedia({
         count: 1,

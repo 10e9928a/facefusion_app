@@ -2,12 +2,18 @@
  * 后端接入配置。
  * - user_hub(用户中台): 登录 / 积分, 走 HMAC + JWT。
  * - facefusion_api(业务后端): 模版 / 人脸库 / 换脸任务, 走 JWT。
- * - 文件上传: pan2.evaplat.com/upload（过渡态直连, 后续收敛为文件中台）。
+ * - upload_hub(文件中台): 上传图片 / 视频，走用户 JWT。
  */
 
-function env(key: keyof ImportMetaEnv, fallback: string): string {
+function requiredEnv(key: keyof ImportMetaEnv): string {
   const v = import.meta.env[key];
-  return v === undefined || v === null || v === '' ? fallback : String(v);
+  const value = v === undefined || v === null ? '' : String(v).trim();
+  if (!value) throw new Error(`环境配置缺少 ${key}`);
+  return value;
+}
+
+function baseUrl(key: keyof ImportMetaEnv): string {
+  return requiredEnv(key).replace(/\/+$/, '');
 }
 
 // 运行平台标识(用于 X-Platform 与登录 provider)
@@ -33,22 +39,23 @@ export function resolvePlatform(): string {
 }
 
 export const HUB_CONFIG = {
-  baseUrl: env('VITE_HUB_BASE', 'http://127.0.0.1:5001'),
-  appKey: env('VITE_HUB_APP_KEY', 'facefusion'),
-  clientSecret: env('VITE_HUB_CLIENT_SECRET', ''),
+  baseUrl: baseUrl('VITE_HUB_BASE'),
+  appKey: requiredEnv('VITE_HUB_APP_KEY'),
+  /** 公开客户端凭据，会进入安装包；不能作为敏感操作的安全边界。 */
+  clientSecret: requiredEnv('VITE_HUB_CLIENT_SECRET'),
   platform: resolvePlatform(),
 };
 
 export const FACEFUSION_CONFIG = {
-  baseUrl: env('VITE_FF_API_BASE', 'http://127.0.0.1:8400'),
+  baseUrl: baseUrl('VITE_FF_API_BASE'),
 };
 
 export const FACEFUSION_ENGINE_CONFIG = {
-  baseUrl: env('VITE_FF_ENGINE_BASE', 'http://127.0.0.1:8000'),
+  baseUrl: baseUrl('VITE_FF_ENGINE_BASE'),
 };
 
 export const UPLOAD_CONFIG = {
-  url: env('VITE_UPLOAD_URL', 'https://pan2.evaplat.com/upload'),
+  url: requiredEnv('VITE_UPLOAD_URL'),
 };
 
 export const STORAGE_KEYS = {

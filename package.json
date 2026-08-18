@@ -17,7 +17,9 @@
     "build:h5": "uni build",
     "build:mp-kuaishou": "uni build -p mp-kuaishou",
     "build:mp-weixin": "uni build -p mp-weixin",
-    "type-check": "vue-tsc --noEmit"
+    "type-check": "vue-tsc --noEmit",
+    "test": "node --test build/config.test.mjs",
+    "check": "yarn type-check && yarn test"
   },
   "dependencies": {
     "@dcloudio/uni-app": "3.0.0-4070620250821001",

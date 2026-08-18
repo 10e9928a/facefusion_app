@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { onLoad, onShow, onUnload } from '@dcloudio/uni-app';
+import { onHide, onShow, onUnload } from '@dcloudio/uni-app';
 import { reactive } from 'vue';
 import { deleteOutput, fetchOutputs, type Output } from '@/services/facefusionApi';
 import { copyText, downloadFileAndSaveToAlbum, formatDateTime } from '@/utils';
@@ -41,38 +41,62 @@ import { ensureLogin, isLoggedIn } from '@/stores/auth';
 
 const state = reactive({
   show: false,
-  timer: undefined as any,
   outputs: [] as Output[],
   current: undefined as Output | undefined,
 });
 
+let pollTimer: ReturnType<typeof setTimeout> | undefined;
+let pageActive = false;
+let loading = false;
+
+const stopPolling = () => {
+  pageActive = false;
+  if (pollTimer) clearTimeout(pollTimer);
+  pollTimer = undefined;
+};
+
+const schedulePolling = () => {
+  if (pollTimer) clearTimeout(pollTimer);
+  pollTimer = undefined;
+  if (!pageActive) return;
+  const hasPending = state.outputs.some((output) =>
+    output.status === 'queued' || output.status === 'running');
+  if (hasPending) pollTimer = setTimeout(() => void load(), 2000);
+};
+
 const load = async () => {
+  if (loading || !pageActive) return;
+  loading = true;
   if (!isLoggedIn()) {
     const ok = await ensureLogin();
     if (!ok) {
       state.outputs = [];
+      loading = false;
       return;
     }
   }
   try {
     const res = await fetchOutputs({ page: 1, size: 30 });
-    state.outputs = res.list || [];
+    if (pageActive) state.outputs = res.list || [];
   } catch (e: any) {
-    state.outputs = [];
-    uni.showToast({ title: e?.message || '加载任务失败', icon: 'none' });
+    if (pageActive) {
+      state.outputs = [];
+      uni.showToast({ title: e?.message || '加载任务失败', icon: 'none' });
+    }
+  } finally {
+    loading = false;
+    schedulePolling();
   }
 };
 
-onLoad(() => {
-  void load();
-  state.timer = setInterval(() => void load(), 2000);
-});
-
 onShow(() => {
+  stopPolling();
+  pageActive = true;
   void load();
 });
 
-onUnload(() => clearInterval(state.timer));
+onHide(stopPolling);
+onUnload(stopPolling);
 
 const isLast = (index: number) => index === state.outputs.length - 1;
 

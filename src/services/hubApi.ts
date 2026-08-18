@@ -1,5 +1,5 @@
 /**
- * user_hub(用户中台) HTTP 客户端: 登录 / 积分 / 上传。
+ * user_hub(用户中台) HTTP 客户端: 登录 / 积分。
  * 响应统一 { ok, data } / { ok:false, error }。
  */
 
@@ -95,19 +95,33 @@ export function redeem(code: string) {
 // ── 上传 ──
 
 function parseUploadUrl(data: string): string {
-  const payload = JSON.parse(data);
+  const payload = JSON.parse(data) as {
+    ok?: boolean;
+    data?: { url?: string; name?: string };
+    url?: string;
+    name?: string;
+    error?: string | { message?: string };
+    message?: string;
+  };
   const url = payload?.data?.url || payload?.url || payload?.name || payload?.data?.name;
-  if (!url) throw new Error(payload?.error || payload?.message || '上传失败');
+  const error = typeof payload?.error === 'string' ? payload.error : payload?.error?.message;
+  if (!url) throw new Error(error || payload?.message || '上传失败');
   return url;
 }
 
-/** 上传图片 / 视频到 pan2.evaplat.com/upload, 返回文件 URL。 */
+/** 上传图片 / 视频到统一 upload_hub；用户 JWT 决定资产归属。 */
 export function uploadMedia(filePath: string): Promise<{ url: string }> {
+  const token = getToken();
+  if (!token) return Promise.reject(new Error('请先登录'));
   return new Promise((resolve, reject) => {
     uni.uploadFile({
       url: UPLOAD_CONFIG.url,
       filePath,
       name: 'file',
+      header: {
+        Authorization: `Bearer ${token}`,
+        'X-App-Key': HUB_CONFIG.appKey,
+      },
       success: (res) => {
         try {
           if (res.statusCode && res.statusCode >= 400) {
