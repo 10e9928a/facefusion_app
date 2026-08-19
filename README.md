@@ -3,6 +3,9 @@
 uni-app 多端换脸应用（微信 / 快手小程序、H5 与 App），对接 User Hub 中台、
 `facefusion_api` 业务后端与通用 Upload Hub；GPU 引擎仅由业务后端在内网访问。
 
+项目交接文档从 [`docs/README.md`](docs/README.md) 进入，覆盖架构、开发、部署、迭代、第三方
+接入和运维。客户端不得恢复直连 GPU 引擎或第三方图床。
+
 ## 架构
 
 ```
