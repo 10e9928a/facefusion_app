@@ -25,10 +25,10 @@ NPM Proxy Host、不加入小程序域名、不发布宿主端口。
 各平台 app ID、登录、包名、证书和权限独立配置。任何登录 code 送 User Hub 服务端交换，不在
 客户端保存平台 secret。引入支付前必须使用平台官方 IAP/支付和服务端幂等验单。
 
-## 6. uniCloud 历史目录
+## 6. 短信登录
 
-`uniCloud-alipay/` 中的短信 schema 不是当前通用身份真源。若仍需使用，先明确数据控制者、
-验证码限流、删除、地域和与 User Hub 的唯一映射；否则从发布产物/部署流程排除。
+客户端只调用 User Hub 的短信接口，不绑定 uniCloud 服务空间或短信模板。实际短信 Provider 由
+User Hub 服务端配置；FaceFusion 的用户、租户与 JWT 仍以 User Hub 为唯一事实源。
 
 ## 7. 接入检查
 

@@ -9,6 +9,13 @@ const REQUIRED_VALUES = [
   'VITE_HUB_CLIENT_SECRET',
 ]
 
+const NORMA_PLATFORM_IDS = new Set([
+  '__UNI__9C561CD',
+  'wxeea9ee2374b18675',
+  'ks699746796204324061',
+  'com.NormaAI.APP',
+])
+
 function requiredValue(env, name) {
   const value = String(env[name] || '').trim()
   if (!value) throw new Error(`[config] ${name} is required`)
@@ -51,5 +58,37 @@ export function validateClientEnvironment(env, production = false) {
   }
   if (/change-me|replace-with|example/i.test(credential)) {
     throw new Error('[config] VITE_HUB_CLIENT_SECRET is still a placeholder')
+  }
+}
+
+export function validatePlatformIdentity(manifest, platform) {
+  if (!platform || platform === 'h5') return
+  const requiredIdentity = (name, value) => {
+    const normalized = String(value || '').trim()
+    if (!normalized) throw new Error(`[identity] ${name} is required for ${platform}`)
+    if (NORMA_PLATFORM_IDS.has(normalized)) {
+      throw new Error(`[identity] ${name} must not reuse the Norma AI product identity`)
+    }
+  }
+
+  if (platform === 'mp-weixin') {
+    requiredIdentity('mp-weixin.appid', manifest?.['mp-weixin']?.appid)
+    return
+  }
+  if (platform === 'mp-kuaishou') {
+    requiredIdentity('mp-kuaishou.appid', manifest?.['mp-kuaishou']?.appid)
+    return
+  }
+  if (platform === 'app' || platform === 'app-ios' || platform === 'app-android') {
+    requiredIdentity('appid', manifest?.appid)
+    if (platform !== 'app-android') {
+      requiredIdentity('app-plus.distribute.ios.appid', manifest?.['app-plus']?.distribute?.ios?.appid)
+    }
+    if (platform !== 'app-ios') {
+      requiredIdentity(
+        'app-plus.distribute.android.packagename',
+        manifest?.['app-plus']?.distribute?.android?.packagename,
+      )
+    }
   }
 }

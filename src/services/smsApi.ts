@@ -1,6 +1,4 @@
-/**
- * 短信登录 — 统一走 user_hub；hub 再按需调用 uniCloud 云函数发真实短信。
- */
+/** 短信登录统一走 User Hub；客户端不感知其短信 Provider。 */
 
 import * as hub from '@/services/hubApi';
 import { getStoredInviterId, HUB_CONFIG } from '@/config/hub';

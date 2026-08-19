@@ -18,6 +18,10 @@ facefusion_app
 客户端内的 HMAC 凭据是公开应用凭据，只用于协议兼容与请求完整性，不能证明客户端可信。
 用户身份、资产归属和敏感操作均以服务端验证 JWT、租户边界、限流和幂等为准。
 
+当前原生/小程序发布为 **BLOCKED**：历史工程曾复用 Norma AI 的平台 AppID，这些值已从
+`src/manifest.json` 清空。必须先创建 FaceFusion 独立的 DCloud、微信、快手和原生包标识，再生成
+正式产物。
+
 ## 本地开发
 
 ```bash

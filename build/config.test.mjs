@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { validateClientEnvironment } from './config.mjs'
+import { validateClientEnvironment, validatePlatformIdentity } from './config.mjs'
 
 const valid = {
   VITE_HUB_BASE: 'https://user.example.com:8443',
@@ -36,5 +36,28 @@ test('upload target must be the unified upload endpoint', () => {
   assert.throws(
     () => validateClientEnvironment({ ...valid, VITE_UPLOAD_URL: 'https://pan.example.com/files' }, true),
     /\/upload endpoint/,
+  )
+})
+
+test('native and mini-program builds require independent product identities', () => {
+  const manifest = {
+    appid: '__UNI__FACEF01',
+    'app-plus': {
+      distribute: {
+        ios: { appid: 'com.example.facefusion' },
+        android: { packagename: 'com.example.facefusion' },
+      },
+    },
+    'mp-weixin': { appid: 'wx-facefusion' },
+  }
+  assert.doesNotThrow(() => validatePlatformIdentity(manifest, 'app'))
+  assert.doesNotThrow(() => validatePlatformIdentity(manifest, 'mp-weixin'))
+  assert.throws(
+    () => validatePlatformIdentity({ ...manifest, appid: '__UNI__9C561CD' }, 'app'),
+    /must not reuse/,
+  )
+  assert.throws(
+    () => validatePlatformIdentity({ ...manifest, 'mp-weixin': { appid: '' } }, 'mp-weixin'),
+    /is required/,
   )
 })

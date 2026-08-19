@@ -14,6 +14,8 @@
 ## 2. 前置
 
 - User Hub 已创建 FaceFusion app、平台登录配置、价格规则和商品。
+- DCloud、微信、快手、iOS Bundle ID 与 Android package 均为 FaceFusion 独立标识；当前 manifest
+  中相关 AppID 已清空，未补齐前发布为 **BLOCKED**。
 - Upload Hub 多 app secret 映射包含 FaceFusion，私有 COS/资产 E2E 通过。
 - FaceFusion API 已经 NPM TLS 暴露，engine 仅内部网络。
 - production 构建变量显式提供非本机 HTTPS 地址和公开 app credential。
